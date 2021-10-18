@@ -24,3 +24,19 @@ I discovered the joys of Go's `GO111MODULE` option, because I had to use it to a
 I haven't used Terraform before, because I usually use Cloudformation, but I want to learn it so I'm using it here. We'll see how it plays with my personal AWS account.
 
 Done today: Got through getting the Go app installed locally, confirming it works, making a Dockerfile for it and getting a Docker image uploaded to DockerHub, installing Terraform and got it running my Docker image on my localhost. Fun!
+
+### Sunday, Oct 17
+
+Looking into how to run Terraform and use it to start up a Fargate cluster, I found this useful article: <https://section411.com/2019/07/hello-world/>
+
+Right now I know how to do all this in CloudFormation, but it's a pain! And I have been wanting to learn how to use Terraform anyways.
+
+I'm interested in Fargate as well, because I could host my containers on instances behind a load balancer, but I would rather have AWS manage that. Time to learn more new stuff.
+
+### Monday, Oct 18
+
+Didn't get much done yesterday, because I couldn't run Terraform init for AWS, which turned out to be a DNS issue on my home network. :/
+
+That's now fixed.
+
+I'm working through the tutorial (and loving it, because Cloudformation is painful!)
