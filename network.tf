@@ -103,9 +103,9 @@ resource "aws_security_group" "egress_all" {
   }
 }
 
-resource "aws_security_group" "ingress_api" {
-  name        = "ingress-api"
-  description = "Allow ingress to API"
+resource "aws_security_group" "ingress_unicorns" {
+  name        = "ingress-unicorns"
+  description = "Allow ingress to Unicorns"
   vpc_id      = aws_vpc.app_vpc.id
 
   ingress {

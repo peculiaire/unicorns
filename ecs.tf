@@ -4,11 +4,12 @@ resource "aws_ecs_cluster" "app" {
 }
 
 # Put the ECS service up, in the cluster, using Fargate
-resource "aws_ecs_service" "unicorns_ecs" {
-  name            = "unicorns-ecs"
-  task_definition = "aws_ecs_task_definition.unicorns_ecs.arn"
+resource "aws_ecs_service" "unicorns" {
+  name            = "unicorns"
+  task_definition = aws_ecs_task_definition.unicorns.arn
   cluster         = aws_ecs_cluster.app.id
   launch_type     = "FARGATE"
+  desired_count   = 1
 
   # all this stuff is in the VPC we're creating
   network_configuration {
@@ -16,7 +17,7 @@ resource "aws_ecs_service" "unicorns_ecs" {
 
     security_groups = [
       aws_security_group.egress_all.id,
-      aws_security_group.ingress_api.id,
+      aws_security_group.ingress_unicorns.id,
     ]
 
     subnets = [
@@ -26,49 +27,26 @@ resource "aws_ecs_service" "unicorns_ecs" {
 
   # we'll need to run this behind a load balancer
   load_balancer {
-    target_group_arn = aws_lb_target_group.unicorns_api.arn
-    container_name   = "unicorns-api"
+    target_group_arn = aws_lb_target_group.unicorns.arn
+    container_name   = "unicorns"
     container_port   = "8080"
   }
-
-  # oh I guess we need to tell it to RUN A CONTAINER (at least 1 of them)
-  desired_count = 1
 }
 
 # logs logs logs, though this service doesn't really log.
 
-resource "aws_cloudwatch_log_group" "unicorns_ecs" {
-  name = "/ecs/unicorns-ecs"
+resource "aws_cloudwatch_log_group" "unicorns" {
+  name = "/ecs/unicorns"
 }
 
 # ECS task definition: more details
 
-resource "aws_ecs_task_definition" "unicorns_ecs" {
-  family = "unicorns-ecs"
+resource "aws_ecs_task_definition" "unicorns" {
+  family = "unicorns"
 
-  container_definitions = <<EOF
-  [
-    {
-      "name": "unicorns-api",
-      "image": "peculiaire/smartdm:latest",
-      "portMappings": [
-        {
-          "containerPort": 8080
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-region": "us-east-2",
-          "awslogs-group": "/ecs/unicorns-ecs",
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
-    }
-  ]
-  EOF
+  container_definitions = file("containerdef.json")
 
-  execution_role_arn = aws_iam_role.unicorns_api_task_execution_role.arn
+  execution_role_arn = aws_iam_role.unicorns_task_execution_role.arn
 
 
   # These are the minimum values for Fargate containers.
@@ -82,8 +60,8 @@ resource "aws_ecs_task_definition" "unicorns_ecs" {
 
 # Oh dear now we have to make IAM roles, gah
 
-resource "aws_iam_role" "unicorns_api_task_execution_role" {
-  name               = "unicorns-api-task-execution-role"
+resource "aws_iam_role" "unicorns_task_execution_role" {
+  name               = "unicorns-task-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
 }
 
@@ -106,15 +84,15 @@ data "aws_iam_policy" "ecs_task_execution_role" {
 
 # Attach the above policy to the execution role.
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
-  role       = aws_iam_role.unicorns_api_task_execution_role.name
+  role       = aws_iam_role.unicorns_task_execution_role.name
   policy_arn = data.aws_iam_policy.ecs_task_execution_role.arn
 }
 
 # ok ok ok now we need a load balancer to run the cluster behind. 
 # I am really not sure if that health check will work, but we will see
 
-resource "aws_lb_target_group" "unicorns_api" {
-  name        = "unicorns-api"
+resource "aws_lb_target_group" "unicorns" {
+  name        = "unicorns"
   port        = 8080
   protocol    = "HTTP"
   target_type = "ip"
@@ -125,11 +103,11 @@ resource "aws_lb_target_group" "unicorns_api" {
     path    = "/"
   }
 
-  depends_on = [aws_alb.unicorns_api]
+  depends_on = [aws_alb.unicorns]
 }
 
-resource "aws_alb" "unicorns_api" {
-  name               = "unicorns-api-lb"
+resource "aws_alb" "unicorns" {
+  name               = "unicorns-lb"
   internal           = false
   load_balancer_type = "application"
 
@@ -147,17 +125,17 @@ resource "aws_alb" "unicorns_api" {
   depends_on = [aws_internet_gateway.igw]
 }
 
-resource "aws_alb_listener" "unicorns_api_http" {
-  load_balancer_arn = aws_alb.unicorns_api.arn
+resource "aws_alb_listener" "unicorns_http" {
+  load_balancer_arn = aws_alb.unicorns.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.unicorns_api.arn
+    target_group_arn = aws_lb_target_group.unicorns.arn
   }
 }
 
 output "alb_url" {
-  value = "http://${aws_alb.unicorns_api.dns_name}"
+  value = "http://${aws_alb.unicorns.dns_name}"
 }
