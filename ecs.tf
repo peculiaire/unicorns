@@ -13,15 +13,16 @@ resource "aws_ecs_service" "unicorns" {
 
   # all this stuff is in the VPC we're creating
   network_configuration {
-    assign_public_ip = false
+    assign_public_ip = true
 
     security_groups = [
       aws_security_group.egress_all.id,
-      aws_security_group.ingress_unicorns.id,
+      aws_security_group.ingress_unicorns.id
     ]
 
     subnets = [
-      aws_subnet.private.id,
+      aws_subnet.subnet2a.id,
+      aws_subnet.subnet2b.id
     ]
   }
 
@@ -89,7 +90,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
 }
 
 # ok ok ok now we need a load balancer to run the cluster behind. 
-# I am really not sure if that health check will work, but we will see
 
 resource "aws_lb_target_group" "unicorns" {
   name        = "unicorns"
@@ -112,13 +112,12 @@ resource "aws_alb" "unicorns" {
   load_balancer_type = "application"
 
   subnets = [
-    aws_subnet.public.id,
-    aws_subnet.private.id,
+    aws_subnet.subnet2a.id,
+    aws_subnet.subnet2b.id,
   ]
 
   security_groups = [
     aws_security_group.http.id,
-    aws_security_group.https.id,
     aws_security_group.egress_all.id,
   ]
 
