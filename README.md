@@ -6,8 +6,8 @@ This is for my SmartDM take home: <https://docs.google.com/presentation/d/1L8k9v
 
 * Confirm Go app runs (unicorns!) ✅
 * Make Docker container ✅
-* Terraform 🐝
-* Load Balancer ❌
+* Terraform ✅
+* Load Balancer 🐝
 * DNS ❌
 * Autoscaling ❌
 
@@ -40,3 +40,13 @@ Didn't get much done yesterday, because I couldn't run Terraform init for AWS, w
 That's now fixed.
 
 I'm working through the tutorial (and loving it, because Cloudformation is painful!)
+
+### Tuesday, Oct 19
+
+Trying to find the best way to demonstrate the unicorns via curl, and figured this out:
+
+`curl --trace - http://<loadbalancer>`
+
+I'm trying to keep the wait time to unicorn (TTU) low, and the buffers in web browsers and cURL are fighting me.
+
+On the bright side I'm getting quite comfortable translating CloudFormation -> Terraform, and I'm better at reading Go. I'm not sure if I would choose Fargate often, but I appreciate any time I don't have to handle service management and I'm willing to deal with some restrictions and config quirks to use it.
