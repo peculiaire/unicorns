@@ -13,6 +13,7 @@ Demo: `curl --trace - http://unicorns-lb-192830076.us-east-2.elb.amazonaws.com`
 -   Terraform ✅
 -   Load Balancer ✅
 -   Autoscaling ✅
+-   Monitoring 📈
 
 -   DNS + TLS ❌ (punted because I do not want to host this in my own DNS)
 
@@ -75,4 +76,13 @@ Security: I'm operating in the AWS ecosystem here, which means security comes do
 1. Security groups: only open those ports to the world that you want to open to the world
 2. IAM roles: scope them as tightly to what you need as possible (obviously SmartDM helps with this!)
 
-I added an autoscaling policy: min 1 container, max 5, and the trigger is 75% CPU threshold. Of course in the real world autoscaling can be tricky to set up, considering the capacity of other systems that might feed into any given system, or take output from it, and depending on how the service to be autoscaled uses its compute resources!
+Monitoring: I'm firmly in the "less is more" camp for monitoring; I want to be able to know if a service is running within its stated SLA, but I do not want to see noisy alerts that cannot be acted on.
+
+1. This app doesn't have any logging, which would probably be something we should fix for production. We want to at least see errors, and we should ideally have logs in a central place that is searchable.
+1. We should also think about metrics that are useful to understand how the service is running (observability). This can be metrics, tracing, instrumentation with sampling... it really depends on the service itself.
+1. We should probably have a canary-type check to see if it's reachable within the Service Level Objective we have set internally, and definitely within any Service Level Agreement settled on with customers.
+1. That canary check should trigger some action to improve the situation if it fails: that could be automated or paging an engineer to see what happened.
+1. The service should have documentation to allow new, sleepy, or unfamiliar engineers to deal with issues as needed.
+1. We should have a status page to report known outages or degradation of service with customers.
+
+Autoscaling: I added an autoscaling policy: min 1 container, max 5, and the trigger is 75% CPU threshold. Of course in the real world autoscaling can be tricky to set up, considering the capacity of other systems that might feed into any given system, or take output from it, and depending on how the service to be autoscaled uses its compute resources!
