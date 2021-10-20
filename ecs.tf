@@ -10,6 +10,10 @@ resource "aws_ecs_service" "unicorns" {
   cluster         = aws_ecs_cluster.app.id
   launch_type     = "FARGATE"
   desired_count   = 1
+  lifecycle {
+    ignore_changes = [
+    desired_count]
+  }
 
   # all this stuff is in the VPC we're creating
   network_configuration {
@@ -31,6 +35,32 @@ resource "aws_ecs_service" "unicorns" {
     target_group_arn = aws_lb_target_group.unicorns.arn
     container_name   = "unicorns"
     container_port   = "8080"
+  }
+}
+
+# autoscale this? 
+
+resource "aws_appautoscaling_target" "unicorns" {
+  max_capacity       = 5
+  min_capacity       = 1
+  resource_id        = "service/${aws_ecs_cluster.app.name}/${aws_ecs_service.unicorns.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "unicorn_cpu" {
+  name               = "unicorn-cpu"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.unicorns.resource_id
+  scalable_dimension = aws_appautoscaling_target.unicorns.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.unicorns.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value = 75
   }
 }
 
