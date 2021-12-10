@@ -1,6 +1,6 @@
 # Notes on making these unicorns fly
 
-This is for my SmartDM take home: <https://docs.google.com/presentation/d/1L8k9vmmxDsNsKtakT8TCZMyCvSvTEuyyhLHkXND1_nA/edit?usp=sharing>
+This is for my StrongDM take home: <https://docs.google.com/presentation/d/1L8k9vmmxDsNsKtakT8TCZMyCvSvTEuyyhLHkXND1_nA/edit?usp=sharing>
 
 App: <http://unicorns-lb-192830076.us-east-2.elb.amazonaws.com>
 
@@ -28,7 +28,7 @@ I worked on this a little bit a day, as other life stuff permitted. My goals wer
 
 I opted to run in a Docker container, because I didn't really know as much as I should about running in Docker and it seemed more reasonable for a small app than running it in a whole VM on its own.
 
-It's pushed to DockerHub here: <https://hub.docker.com/repository/docker/peculiaire/smartdm>
+It's pushed to DockerHub here: <https://hub.docker.com/repository/docker/peculiaire/strongdm>
 
 I discovered the joys of Go's `GO111MODULE` option, because I had to use it to actually build the Unicorn Go module into the Dockerfile.
 
@@ -74,7 +74,7 @@ DNS + TLS: if I was going to deploy this to production for real, I would do the 
 Security: I'm operating in the AWS ecosystem here, which means security comes down to a few things:
 
 1. Security groups: only open those ports to the world that you want to open to the world
-2. IAM roles: scope them as tightly to what you need as possible (obviously SmartDM helps with this!)
+2. IAM roles: scope them as tightly to what you need as possible (obviously StrongDM helps with this!)
 
 Monitoring: I'm firmly in the "less is more" camp for monitoring; I want to be able to know if a service is running within its stated SLA, but I do not want to see noisy alerts that cannot be acted on.
 

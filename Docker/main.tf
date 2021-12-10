@@ -5,7 +5,7 @@ provider "docker" {
 }
 
 resource "docker_image" "unicorn" {
-  name         = "peculiaire/smartdm:latest"
+  name         = "peculiaire/strongdm:latest"
   keep_locally = false
 }
 
